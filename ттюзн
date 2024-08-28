@@ -1,0 +1,60 @@
+import sqlite3
+
+# Создаем и подключаемся к базе данных
+conn = sqlite3.connect('garage.db')
+cursor = conn.cursor()
+
+# Создаем таблицу для хранения автомобилей
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS cars (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        марка TEXT,
+        модель TEXT,
+        год INTEGER
+    )
+''')
+conn.commit()
+
+class Garage:
+    def add_car(self, марка, модель, год):
+        cursor.execute('''
+            INSERT INTO cars (марка, модель, год) VALUES (?, ?, ?)
+        ''', (марка, модель, год))
+        conn.commit()
+
+    def remove_car(self, марка, модель):
+        cursor.execute('''
+            DELETE FROM cars WHERE марка = ? AND модель = ?
+        ''', (марка, модель))
+        conn.commit()
+
+    def list_cars(self):
+        cursor.execute('SELECT * FROM cars')
+        cars = cursor.fetchall()
+        if not cars:
+            print("Гараж пуст.")
+        else:
+            for car in cars:
+                print(f"{car[3]} {car[1]} {car[2]}")
+
+# Создаем объект Garage
+garage = Garage()
+
+# Добавляем автомобили в гараж
+garage.add_car("Toyota", "Camry", 2020)
+garage.add_car("Honda", "Civic", 2019)
+garage.add_car("Ford", "Mustang", 2021)
+
+# Выводим список автомобилей
+print("Автомобили в гараже:")
+garage.list_cars()
+
+# Удаляем автомобиль Honda Civic
+garage.remove_car("Honda", "Civic")
+
+# Выводим оставшиеся автомобили
+print("\nАвтомобили в гараже после удаления:")
+garage.list_cars()
+
+# Закрываем соединение с базой данных
+conn.close()
